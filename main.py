@@ -50,13 +50,23 @@ def get_data():
                 titl, fun = item[0], item[3]
                 add_zn = ''
                 if fun.find_element_by_tag_name('span').value_of_css_property('color') == 'rgba(239, 104, 104, 1)':
-                    add_zn = '- '
-                    minus.append([add_zn + fun.text, titl.text.split('\n')[0]])
+                    add_zn = '-'
+                    minus.append([float(add_zn + fun.text[:-1]), titl.text.split('\n')[0]])
                 else:
-                    plus.append([add_zn + fun.text, titl.text.split('\n')[0]])
+                    plus.append([float(add_zn + fun.text[:-1]), titl.text.split('\n')[0]])
                 exp_data.append([titl.text.split('\n')[0] + '\n\n', add_zn + fun.text])
+            plus.sort(key=lambda x: x[0])
+            minus.sort(key=lambda x: x[0])
+            str_plus, str_minus = '\n', '\n'
+            for i in range(len(plus)):
+                plus[i][0] = f"{round(plus[i][0], 4)}({round(plus[i][0] * 24 * 365, 1)}%)"
+                str_plus += f"{plus[i][0]}    {plus[i][1]}\n"
+            for i in range(len(plus)):
+                minus[i][0] = f"{round(minus[i][0], 4)}({round(minus[i][0] * 24 * 365, 1)}%)"
+                str_minus += f"{minus[i][0]}    {minus[i][1]}\n"
+            # print(f"Longs pay Shorts if positive:\n {str_plus}\nShorts pay Longs if negative:\n {str_minus}")
             bot.send_message(
-                channel_name, f"Longs pay Shorts if positive:\n{tabulate(plus)}\nShorts pay Longs if negative:\n{tabulate(minus)}")
+                channel_name, f"Longs pay Shorts if positive:\n{str_plus}\nShorts pay Longs if negative:\n{str_minus}")
             return
         except Exception as e:
             print("ERROR   ", e)
@@ -68,6 +78,7 @@ def welcome(message):
         bot.send_message(message.chat.id, 'Привет, я бот для оповещении об изменениях на сайте')
 
 
+# get_data()
 every().hour.at(f":{every_minutes}").do(get_data)
 th = Thread(target=work)
 th.start()
