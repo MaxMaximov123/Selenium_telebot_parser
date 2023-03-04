@@ -4,8 +4,9 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/interpretator" />
       <excludeFolder url="file://$MODULE_DIR$/interpritator" />
+      <excludeFolder url="file://$MODULE_DIR$/interpritator1" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.10 (FinanceBot_freelance — копия)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.10 (FinanceBot_freelance 04.03.2023)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

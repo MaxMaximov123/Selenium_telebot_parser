@@ -1,5 +1,4 @@
 from pprint import pprint
-
 from schedule import every, run_pending
 import telebot
 from config import *
@@ -13,7 +12,6 @@ from tabulate import tabulate
 
 
 bot = telebot.TeleBot(token)
-sum1 = check_sum
 
 
 def work():
@@ -25,6 +23,7 @@ def work():
 def get_data():
     while True:
         try:
+            print("запуск")
             ua = dict(DesiredCapabilities.CHROME)
             options = webdriver.ChromeOptions()
             options.add_argument('headless')
@@ -33,7 +32,7 @@ def get_data():
             driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
             driver.get('https://kwenta.eth.limo/dashboard/markets/')
 
-            time.sleep(4)
+            time.sleep(5)
             titles = driver.find_elements_by_xpath('//div[@class="sc-b443446-8 cBdjNX"]')
             fundings = driver.find_elements_by_xpath(
                 '//div[@class="sc-54e96af5-0 sc-54e96af5-1 sc-14eb40a9-1 kZKXJo table-body-cell"]')
@@ -49,7 +48,6 @@ def get_data():
                     loc = []
             for item in data:
                 titl, fun = item[0], item[3]
-                # print(fun.value_of_css_property('color'))
                 add_zn = ''
                 if fun.find_element_by_tag_name('span').value_of_css_property('color') == 'rgba(239, 104, 104, 1)':
                     add_zn = '- '
@@ -58,31 +56,19 @@ def get_data():
                     plus.append([add_zn + fun.text, titl.text.split('\n')[0]])
                 exp_data.append([titl.text.split('\n')[0] + '\n\n', add_zn + fun.text])
             bot.send_message(
-                admin_id, f"Longs pay Shorts if positive:\n{tabulate(plus)}\nShorts pay Longs if negative:\n{tabulate(minus)}")
+                channel_name, f"Longs pay Shorts if positive:\n{tabulate(plus)}\nShorts pay Longs if negative:\n{tabulate(minus)}")
             return
         except Exception as e:
             print("ERROR   ", e)
-            time.sleep(120)
-
 
 
 @bot.message_handler(commands=["start"])
 def welcome(message):
     if message.chat.id == admin_id:
-        markup = types.ReplyKeyboardMarkup(row_width=3, resize_keyboard=True)
-        markup.add(types.KeyboardButton(text="Прочие данные"))
-        bot.send_message(admin_id, 'Привет, я бот для оповещении об изменениях на сайте', reply_markup=markup)
+        bot.send_message(message.chat.id, 'Привет, я бот для оповещении об изменениях на сайте')
 
 
-
-@bot.message_handler(content_types=["text"])
-def chat(message):
-    if message.chat.id == admin_id and message.text == "Прочие данные":
-        get_data()
-
-
-get_data()
-# every(every_minutes).minutes.do(get_data)
+every().hour.at(f":{every_minutes}").do(get_data)
 th = Thread(target=work)
 th.start()
 
