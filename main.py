@@ -31,6 +31,7 @@ def work():
 
 
 def get_data():
+    global driver
     while True:
         try:
             print("запуск")
@@ -85,74 +86,86 @@ def get_data():
             return
         except Exception as e:
             print("ERROR   ", e)
+            driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+            driver.get('https://kwenta.eth.limo/dashboard/markets/')
 
 
 def send_weekly_sum():
-    with open('weekly_sum.json', 'r') as f:
-        weekly_sum = json.load(f)
-    plus = []
-    minus = []
-    for key in weekly_sum:
-        if weekly_sum[key] < 0:
-            minus.append([weekly_sum[key], key])
-        else:
-            plus.append([weekly_sum[key], key])
-    plus.sort(key=lambda x: x[0])
-    minus.sort(key=lambda x: x[0])
-    str_minus, str_plus = '\n', '\n'
-    for i in range(len(plus)):
-        plus[i][0] = f"{round(plus[i][0], 4)}({round(plus[i][0] * 24 * 365, 1)}%)"
-        str_plus += f"{plus[i][0]}    {plus[i][1]}\n"
-    for i in range(len(plus)):
-        minus[i][0] = f"{round(minus[i][0], 4)}({round(minus[i][0] * 24 * 365, 1)}%)"
-        str_minus += f"{minus[i][0]}    {minus[i][1]}\n"
+    while True:
+        try:
+            with open('weekly_sum.json', 'r') as f:
+                weekly_sum = json.load(f)
+            plus = []
+            minus = []
+            for key in weekly_sum:
+                if weekly_sum[key] < 0:
+                    minus.append([weekly_sum[key], key])
+                else:
+                    plus.append([weekly_sum[key], key])
+            plus.sort(key=lambda x: x[0])
+            minus.sort(key=lambda x: x[0])
+            str_minus, str_plus = '\n', '\n'
+            for i in range(len(plus)):
+                plus[i][0] = f"{round(plus[i][0], 4)}({round(plus[i][0] * 24 * 365, 1)}%)"
+                str_plus += f"{plus[i][0]}    {plus[i][1]}\n"
+            for i in range(len(plus)):
+                minus[i][0] = f"{round(minus[i][0], 4)}({round(minus[i][0] * 24 * 365, 1)}%)"
+                str_minus += f"{minus[i][0]}    {minus[i][1]}\n"
 
-    if SEND_MESSAGE:
-        bot.send_message(
-            channel_name,
-            f"Weekly\n\n Longs pay Shorts if positive:\n{str_plus}\nShorts pay Longs if negative:\n{str_minus}")
-    else:
-        print(f"Weekly\n\n Longs pay Shorts if positive:\n{str_plus}\nShorts pay Longs if negative:\n{str_minus}")
-        print('-' * 20)
-    with open('weekly_sum.json', 'w') as f:
-        f.write('{}')
+            if SEND_MESSAGE:
+                bot.send_message(
+                    channel_name,
+                    f"Weekly\n\n Longs pay Shorts if positive:\n{str_plus}\nShorts pay Longs if negative:\n{str_minus}")
+            else:
+                print(f"Weekly\n\n Longs pay Shorts if positive:\n{str_plus}\nShorts pay Longs if negative:\n{str_minus}")
+                print('-' * 20)
+            with open('weekly_sum.json', 'w') as f:
+                f.write('{}')
+            return
+        except Exception as e:
+            print('ERROR: ', e)
 
 
 def send_daily_sum():
-    with open('daily_sum.json', 'r') as f:
-        daily_sum = json.load(f)
-    with open('weekly_sum.json', 'r') as f:
-        weekly_sum = json.load(f)
-    for key in daily_sum:
-        weekly_sum[key] = weekly_sum.get(key, 0) + daily_sum[key]
-    with open('weekly_sum.json', 'w') as f:
-        json.dump(weekly_sum, f, ensure_ascii=False)
-    plus = []
-    minus = []
-    for key in daily_sum:
-        if daily_sum[key] < 0:
-            minus.append([daily_sum[key], key])
-        else:
-            plus.append([daily_sum[key], key])
-    plus.sort(key=lambda x: x[0])
-    minus.sort(key=lambda x: x[0])
-    str_minus, str_plus = '\n', '\n'
-    for i in range(len(plus)):
-        plus[i][0] = f"{round(plus[i][0], 4)}({round(plus[i][0] * 24 * 365, 1)}%)"
-        str_plus += f"{plus[i][0]}    {plus[i][1]}\n"
-    for i in range(len(plus)):
-        minus[i][0] = f"{round(minus[i][0], 4)}({round(minus[i][0] * 24 * 365, 1)}%)"
-        str_minus += f"{minus[i][0]}    {minus[i][1]}\n"
+    while True:
+        try:
+            with open('daily_sum.json', 'r') as f:
+                daily_sum = json.load(f)
+            with open('weekly_sum.json', 'r') as f:
+                weekly_sum = json.load(f)
+            for key in daily_sum:
+                weekly_sum[key] = weekly_sum.get(key, 0) + daily_sum[key]
+            with open('weekly_sum.json', 'w') as f:
+                json.dump(weekly_sum, f, ensure_ascii=False)
+            plus = []
+            minus = []
+            for key in daily_sum:
+                if daily_sum[key] < 0:
+                    minus.append([daily_sum[key], key])
+                else:
+                    plus.append([daily_sum[key], key])
+            plus.sort(key=lambda x: x[0])
+            minus.sort(key=lambda x: x[0])
+            str_minus, str_plus = '\n', '\n'
+            for i in range(len(plus)):
+                plus[i][0] = f"{round(plus[i][0], 4)}({round(plus[i][0] * 24 * 365, 1)}%)"
+                str_plus += f"{plus[i][0]}    {plus[i][1]}\n"
+            for i in range(len(plus)):
+                minus[i][0] = f"{round(minus[i][0], 4)}({round(minus[i][0] * 24 * 365, 1)}%)"
+                str_minus += f"{minus[i][0]}    {minus[i][1]}\n"
 
-    if SEND_MESSAGE:
-        bot.send_message(
-            channel_name,
-            f"Daily\n\n Longs pay Shorts if positive:\n{str_plus}\nShorts pay Longs if negative:\n{str_minus}")
-    else:
-        print(f"Daily\n\n Longs pay Shorts if positive:\n{str_plus}\nShorts pay Longs if negative:\n{str_minus}")
-        print('-' * 20)
-    with open('daily_sum.json', 'w') as f:
-        f.write('{}')
+            if SEND_MESSAGE:
+                bot.send_message(
+                    channel_name,
+                    f"Daily\n\n Longs pay Shorts if positive:\n{str_plus}\nShorts pay Longs if negative:\n{str_minus}")
+            else:
+                print(f"Daily\n\n Longs pay Shorts if positive:\n{str_plus}\nShorts pay Longs if negative:\n{str_minus}")
+                print('-' * 20)
+            with open('daily_sum.json', 'w') as f:
+                f.write('{}')
+            return
+        except Exception as e:
+            print('ERROR: ', e)
 
 
 @bot.message_handler(commands=["start"])
