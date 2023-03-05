@@ -12,6 +12,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from tabulate import tabulate
 
 
+print("START")
 bot = telebot.TeleBot(token)
 SEND_MESSAGE = True
 
